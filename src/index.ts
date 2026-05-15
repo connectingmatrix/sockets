@@ -1,0 +1,94 @@
+import { LocalEventBus, nowIso, type EventHandler, type PackageHealth, type PackageModule } from './contracts.js';
+
+export interface SocketEnvelope<T = unknown> {
+  room: string;
+  event: string;
+  payload: T;
+  at: string;
+  traceId?: string;
+}
+
+export interface SocketTransport {
+  send(room: string, envelope: SocketEnvelope): Promise<void> | void;
+  on?(room: string, handler: EventHandler<SocketEnvelope>): () => void;
+}
+
+class SocketRuntime {
+  private readonly bus = new LocalEventBus();
+  private transport?: SocketTransport;
+  private readonly registeredRooms = new Set<string>();
+
+  bindTransport(transport: SocketTransport): this {
+    this.transport = transport;
+    return this;
+  }
+
+  bindWithServer(endpoint: string): this {
+    if (typeof WebSocket === 'undefined') return this;
+    const socket = new WebSocket(endpoint);
+    this.transport = {
+      send: (_room, envelope) => { if (socket.readyState === socket.OPEN) socket.send(JSON.stringify(envelope)); },
+    };
+    socket.addEventListener('message', (message) => {
+      try {
+        const envelope = JSON.parse(String(message.data)) as SocketEnvelope;
+        void this.bus.emit(envelope.room, envelope);
+      } catch {
+        // ignore malformed external socket payloads
+      }
+    });
+    return this;
+  }
+
+  register(room: string): this {
+    this.registeredRooms.add(room);
+    return this;
+  }
+
+  /** Backward-compatible typo from the original API request. */
+  regester(room: string): this {
+    return this.register(room);
+  }
+
+  on<T = unknown>(room: string, handler: EventHandler<SocketEnvelope<T>>): () => void {
+    this.register(room);
+    const offLocal = this.bus.on(room, handler as EventHandler<unknown>);
+    const offRemote = this.transport?.on?.(room, handler as EventHandler<SocketEnvelope>);
+    return () => {
+      offLocal();
+      offRemote?.();
+    };
+  }
+
+  async broadcast<T = unknown>(room: string, payload: T, event = 'message', traceId?: string): Promise<SocketEnvelope<T>> {
+    this.register(room);
+    const envelope: SocketEnvelope<T> = { room, event, payload, at: nowIso(), traceId };
+    await this.bus.emit(room, envelope);
+    await this.transport?.send(room, envelope);
+    return envelope;
+  }
+
+  async emitLog(payload: Record<string, unknown>): Promise<SocketEnvelope<Record<string, unknown>>> {
+    return this.broadcast('logs', payload, 'log');
+  }
+
+  rooms(): string[] {
+    return [...this.registeredRooms];
+  }
+
+  health(): PackageHealth {
+    return { name: '@connectingmatrix/sockets', status: 'ok', checkedAt: nowIso(), details: { rooms: this.rooms().length, transport: Boolean(this.transport) } };
+  }
+}
+
+export const Socket = new SocketRuntime();
+export const createPackage = (): PackageModule => ({
+  name: '@connectingmatrix/sockets',
+  version: '0.1.0',
+  health: () => Socket.health(),
+  routes: [
+    { method: 'GET', path: '/sockets/health', handler: () => Socket.health() },
+  ],
+});
+
+export * from './contracts.js';
