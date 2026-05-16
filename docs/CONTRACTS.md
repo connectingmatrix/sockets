@@ -4,7 +4,7 @@ Frontend/backend room socket architecture with local fallback bus, log emission,
 
 ## Ownership
 
-This package owns its `src/ui`, `src/backend`, `src/entity`, GraphQL bundle, migrations, health/status, launcher, and package contracts. It can be included in backend or UI without assuming a monorepo.
+This package owns its `src/client`, `src/backend`, `src/entity`, GraphQL bundle, migrations, health/status, launcher, and package contracts. It can be included in backend or UI without assuming a monorepo.
 
 ## Public contracts
 
@@ -72,7 +72,7 @@ GraphQL namespace and routes are returned by `createPackage()`. Routes include h
 
 ## Folder counts
 
-- `src/ui`: 19 files
+- `src/client`: 19 files
 - `src/backend`: 25 files
 - `src/entity`: 2 files
 - `migrations`: 1 files
