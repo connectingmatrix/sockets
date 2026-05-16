@@ -1,6 +1,6 @@
 import { LocalEventBus, nowIso, type EventHandler, type PackageHealth, type PackageModule, type RequestContext } from './contracts.js';
 import { PackageObservability } from './observability.js';
-import { createStubLauncher } from './launcher.js';
+import { createPackageStatusPanel } from './services/package-status.service.js';
 
 export interface SocketEnvelope<T = unknown> {
   room: string;
@@ -67,16 +67,16 @@ export const createPackage = (): PackageModule => ({
   name: '@connectingmatrix/sockets',
   version: '0.4.0',
   health: () => Socket.health(),
-  launcher: createStubLauncher,
+  launcher: createPackageStatusPanel,
   runtime: { Socket, observability: PackageObservability },
   routes: [
     { method: 'GET', path: '/sockets/health', handler: () => Socket.health() },
     { method: 'GET', path: '/sockets/rooms', handler: () => Socket.rooms() },
-    { method: 'GET', path: '/sockets/launcher', handler: (request) => createStubLauncher((request as { context?: RequestContext }).context ?? {}) },
+    { method: 'GET', path: '/sockets/launcher', handler: (request) => createPackageStatusPanel((request as { context?: RequestContext }).context ?? {}) },
   ],
 });
 
 export * from './contracts.js';
 export * from './package-structure.js';
 export * from './observability.js';
-export * from './launcher.js';
+export * from './services/package-status.service.js';

@@ -1,5 +1,5 @@
 import { Executor } from '@workflow/executor';
-import type { WorkflowRunLogEvent } from '@connectingmatrix/workflows/services/workflow/contracts/types';
+import type { WorkflowRunLogEvent } from '@connectingmatrix/workflow-driver/services/workflow/contracts/types';
 
 export const getWorkflowUserRoom = (userId: string) => Executor.userRoom(userId);
 export const getWorkflowRunRoom = (userId: string, runId: string) => Executor.logsRoom(userId, runId);

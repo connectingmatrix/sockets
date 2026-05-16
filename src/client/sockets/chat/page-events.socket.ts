@@ -1,4 +1,4 @@
-import type { JsonObject } from '@/orm/types';
+import type { JsonObject } from '@giga/dataloader/client/legacy/orm/types';
 
 let disconnectPage: (() => void) | null = null;
 

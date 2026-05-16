@@ -1,4 +1,4 @@
-import type { JsonObject } from '@/orm/types';
+import type { JsonObject } from '@giga/dataloader/client/legacy/orm/types';
 
 export type AIChatQueryData = JsonObject;
 export type ChatExecutionMode = 'DEFAULT' | 'AGENT' | 'WORKFLOW' | 'SWARM';

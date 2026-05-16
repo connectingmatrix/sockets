@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
-import { API_ORIGIN, CHAT_REQUEST_TIMEOUT_MS, CHAT_WS_URL } from '@/graphql/env';
-import { createRequestId } from '@/graphql/client';
+import { API_ORIGIN, CHAT_REQUEST_TIMEOUT_MS, CHAT_WS_URL } from '@giga/dataloader/client/legacy/graphql/env';
+import { createRequestId } from '@giga/dataloader/client/legacy/graphql/client';
 import type { AIChatQueryData, AIChatQueryRequest, ChatAuthTokens, ChatSocketHandlers } from './types.socket';
 import { resolveSocketConfig } from '../core/socket-url';
 import { handleChatAck } from './ack-handle.socket';
